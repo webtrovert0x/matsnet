@@ -9,7 +9,12 @@ export default function Dashboard({ provider, account, contractAddress }) {
 
   const fetchUserDomains = useCallback(async () => {
     if (!provider || !account) return;
-    
+    // Guard against zero/missing contract address
+    if (!contractAddress || contractAddress === '0x0000000000000000000000000000000000000000') {
+      console.warn('Contract address not configured.');
+      setIsLoading(false);
+      return;
+    }
     try {
       setIsLoading(true);
       const contract = new ethers.Contract(contractAddress, MezoDomainsABI.abi, provider);
