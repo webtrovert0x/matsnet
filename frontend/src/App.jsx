@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
-import Header from './components/Header';
-import Hero from './components/Hero';
-import DomainSearch from './components/DomainSearch';
-import Dashboard from './components/Dashboard';
-import { useToast, ToastContainer } from './components/Toast';
+import { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import Header from "./components/Header";
+import Hero from "./components/Hero";
+import DomainSearch from "./components/DomainSearch";
+import Dashboard from "./components/Dashboard";
+import { useToast, ToastContainer } from "./components/Toast";
 
 // Hardcode placeholder or read from env
-const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0x0000000000000000000000000000000000000000";
+const CONTRACT_ADDRESS =
+  import.meta.env.VITE_CONTRACT_ADDRESS ||
+  "0x0000000000000000000000000000000000000000";
 
 function App() {
   const [provider, setProvider] = useState(null);
@@ -21,12 +23,15 @@ function App() {
   // Initialize or handle account changes
   useEffect(() => {
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', () => window.location.reload());
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      window.ethereum.on("chainChanged", () => window.location.reload());
     }
     return () => {
       if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener(
+          "accountsChanged",
+          handleAccountsChanged,
+        );
       }
     };
   }, []);
@@ -35,7 +40,7 @@ function App() {
     if (accounts.length === 0) {
       setAccount("");
       setSigner(null);
-      console.log('Please connect to MetaMask.');
+      console.log("Please connect to MetaMask.");
     } else if (accounts[0] !== account) {
       setAccount(accounts[0]);
       setupProvider();
@@ -45,32 +50,32 @@ function App() {
   const setupProvider = async () => {
     const tempProvider = new ethers.BrowserProvider(window.ethereum);
     const tempSigner = await tempProvider.getSigner();
-    
+
     // Suggest Matsnet (Chain ID 31611)
     const network = await tempProvider.getNetwork();
     if (Number(network.chainId) !== 31611) {
       try {
         await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x7B7B' }], // 31611 in hex
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0x7B7B" }], // 31611 in hex
         });
       } catch (switchError) {
         // This error code indicates that the chain has not been added to MetaMask.
         if (switchError.code === 4902) {
           try {
             await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
+              method: "wallet_addEthereumChain",
               params: [
                 {
-                  chainId: '0x7B7B',
-                  chainName: 'Mezo Matsnet Testnet',
-                  rpcUrls: ['https://rpc.test.mezo.org'],
+                  chainId: "0x7B7B",
+                  chainName: "Mezo Matsnet Testnet",
+                  rpcUrls: ["https://rpc.test.mezo.org"],
                   nativeCurrency: {
-                    name: 'Mezo Bitcoin',
-                    symbol: 'BTC',
+                    name: "Mezo Bitcoin",
+                    symbol: "BTC",
                     decimals: 18,
                   },
-                  blockExplorerUrls: ['https://explorer.test.mezo.org'],
+                  blockExplorerUrls: ["https://explorer.test.mezo.org"],
                 },
               ],
             });
@@ -86,10 +91,12 @@ function App() {
   };
 
   const connectWallet = async () => {
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== "undefined") {
       try {
         setIsConnecting(true);
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
         handleAccountsChanged(accounts);
       } catch (error) {
         console.error("Error connecting wallet", error);
@@ -97,7 +104,7 @@ function App() {
         setIsConnecting(false);
       }
     } else {
-      showToast("Please install MetaMask or another Web3 wallet.", 'error');
+      showToast("Please install MetaMask or another Web3 wallet.", "error");
     }
   };
 
@@ -109,30 +116,30 @@ function App() {
 
   return (
     <div className="app-wrapper animate-fade-in">
-      <Header 
-        account={account} 
+      <Header
+        account={account}
         connectWallet={connectWallet}
         disconnectWallet={disconnectWallet}
-        isConnecting={isConnecting} 
+        isConnecting={isConnecting}
       />
       <main className="container">
         <Hero />
         <div id="search">
-          <DomainSearch 
-            provider={provider} 
-            signer={signer} 
-            account={account} 
+          <DomainSearch
+            provider={provider}
+            signer={signer}
+            account={account}
             contractAddress={CONTRACT_ADDRESS}
             connectWallet={connectWallet}
             showToast={showToast}
-            onDomainRegistered={() => setRefreshKey(prev => prev + 1)}
+            onDomainRegistered={() => setRefreshKey((prev) => prev + 1)}
           />
         </div>
         {account && (
           <div id="dashboard">
-            <Dashboard 
-              provider={provider} 
-              account={account} 
+            <Dashboard
+              provider={provider}
+              account={account}
               contractAddress={CONTRACT_ADDRESS}
               showToast={showToast}
               refreshKey={refreshKey}
@@ -140,6 +147,9 @@ function App() {
           </div>
         )}
       </main>
+      <footer style={{ textAlign: "center", padding: "2rem", marginTop: "2rem", color: "var(--text-secondary)" }}>
+        <p>&copy; copyright 2026, made with love, by Philip</p>
+      </footer>
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );

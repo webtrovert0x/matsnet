@@ -13,7 +13,7 @@ export default function Header({ account, connectWallet, disconnectWallet, isCon
       <div className="header-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 0', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <img 
-            src="/mezo-logo.png" 
+            src="/IMG_3980.jpeg" 
             alt="Mezo Logo" 
             style={{ width: '44px', height: '44px', borderRadius: '12px', objectFit: 'cover' }} 
           />
