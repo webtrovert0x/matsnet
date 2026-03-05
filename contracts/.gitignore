@@ -1,0 +1,12 @@
+# Environment (NEVER commit this — contains your private key!)
+.env
+.env.*
+
+# Hardhat
+node_modules
+cache
+artifacts
+
+# Misc
+.DS_Store
+*.log

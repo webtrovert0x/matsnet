@@ -1,0 +1,5 @@
+# Root-level catchall
+.env
+.env.*
+.DS_Store
+node_modules
