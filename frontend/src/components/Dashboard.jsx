@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import MezoDomainsABI from '../contracts/MezoDomains.json';
 import { LayoutDashboard, ExternalLink } from 'lucide-react';
 
-export default function Dashboard({ provider, account, contractAddress }) {
+export default function Dashboard({ provider, account, contractAddress, showToast, refreshKey }) {
   const [domains, setDomains] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -40,10 +40,13 @@ export default function Dashboard({ provider, account, contractAddress }) {
       setDomains(userDomains);
     } catch (error) {
       console.error("Failed to fetch domains:", error);
+      if (showToast) {
+        showToast("Failed to fetch your domains.", "error");
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [provider, account, contractAddress]);
+  }, [provider, account, contractAddress, showToast, refreshKey]);
 
   useEffect(() => {
     fetchUserDomains();

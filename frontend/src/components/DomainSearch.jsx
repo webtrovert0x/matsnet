@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { Search, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import MezoDomainsABI from '../contracts/MezoDomains.json';
 
-export default function DomainSearch({ provider, signer, account, contractAddress, connectWallet }) {
+export default function DomainSearch({ provider, signer, account, contractAddress, connectWallet, showToast, onDomainRegistered }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState(null); // { available: boolean, price?: string, owner?: string }
@@ -27,7 +27,7 @@ export default function DomainSearch({ provider, signer, account, contractAddres
         // Fallback to a default provider if wallet not connected, 
         // but for simplicity we ask them to connect.
         if (!account) {
-          alert("Please connect your wallet to search for domains.");
+          showToast("Please connect your wallet to search for domains.", 'error');
           setIsSearching(false);
           return;
         }
@@ -72,10 +72,14 @@ export default function DomainSearch({ provider, signer, account, contractAddres
       // Update UI to show it's now owned by current user
       setSearchResult({ available: false, owner: account });
       
-      alert(`Successfully registered ${searchResult.domain}!`);
+      showToast(`Successfully registered ${searchResult.domain}!`, 'success');
+      
+      if (onDomainRegistered) {
+        onDomainRegistered();
+      }
     } catch (error) {
       console.error("Registration failed:", error);
-      alert("Registration failed. Please try again.");
+      showToast("Registration failed. Please try again.", 'error');
     } finally {
       setIsRegistering(false);
     }

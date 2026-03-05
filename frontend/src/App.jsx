@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import DomainSearch from './components/DomainSearch';
 import Dashboard from './components/Dashboard';
+import { useToast, ToastContainer } from './components/Toast';
 
 // Hardcode placeholder or read from env
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0x0000000000000000000000000000000000000000";
@@ -13,6 +14,9 @@ function App() {
   const [signer, setSigner] = useState(null);
   const [account, setAccount] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { toasts, addToast, removeToast } = useToast();
+  const showToast = addToast;
 
   // Initialize or handle account changes
   useEffect(() => {
@@ -93,7 +97,7 @@ function App() {
         setIsConnecting(false);
       }
     } else {
-      alert("Please install MetaMask or another Web3 wallet.");
+      showToast("Please install MetaMask or another Web3 wallet.", 'error');
     }
   };
 
@@ -120,6 +124,8 @@ function App() {
             account={account} 
             contractAddress={CONTRACT_ADDRESS}
             connectWallet={connectWallet}
+            showToast={showToast}
+            onDomainRegistered={() => setRefreshKey(prev => prev + 1)}
           />
         </div>
         {account && (
@@ -128,10 +134,13 @@ function App() {
               provider={provider} 
               account={account} 
               contractAddress={CONTRACT_ADDRESS}
+              showToast={showToast}
+              refreshKey={refreshKey}
             />
           </div>
         )}
       </main>
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 }
