@@ -16,6 +16,7 @@ export default function DomainSearch({
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState(null); // { available: boolean, price?: string, owner?: string }
   const [isRegistering, setIsRegistering] = useState(false);
+  const [recipientAddress, setRecipientAddress] = useState("");
   const [txHash, setTxHash] = useState("");
 
   const handleSearch = async (e) => {
@@ -31,6 +32,7 @@ export default function DomainSearch({
     setIsSearching(true);
     setSearchResult(null);
     setTxHash("");
+    setRecipientAddress("");
 
     try {
       if (!provider) {
@@ -85,15 +87,30 @@ export default function DomainSearch({
 
       const feeWei = ethers.parseEther(searchResult.price);
 
-      const tx = await contract.registerDomain(searchResult.domain, {
-        value: feeWei,
-      });
+      let tx;
+      if (recipientAddress && recipientAddress.trim() !== "") {
+        if (!ethers.isAddress(recipientAddress)) {
+          showToast("Invalid recipient address", "error");
+          setIsRegistering(false);
+          return;
+        }
+        tx = await contract.registerDomainFor(searchResult.domain, recipientAddress, {
+          value: feeWei,
+        });
+      } else {
+        tx = await contract.registerDomain(searchResult.domain, {
+          value: feeWei,
+        });
+      }
+
       setTxHash(tx.hash);
 
       await tx.wait();
 
-      // Update UI to show it's now owned by current user
-      setSearchResult({ available: false, owner: account });
+      const newOwner = (recipientAddress && ethers.isAddress(recipientAddress)) ? recipientAddress : account;
+
+      // Update UI to show it's now owned by the new owner
+      setSearchResult({ available: false, owner: newOwner });
 
       showToast(`Successfully registered ${searchResult.domain}!`, "success");
 
@@ -230,18 +247,36 @@ export default function DomainSearch({
                       {searchResult.price} BTC
                     </div>
                     {account ? (
-                      <button
-                        className="btn btn-primary"
-                        onClick={handleRegister}
-                        disabled={isRegistering}
-                        style={{ width: "100%" }}
-                      >
-                        {isRegistering ? (
-                          <Loader2 size={18} className="animate-spin" />
-                        ) : (
-                          "Register Now"
-                        )}
-                      </button>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <input
+                          type="text"
+                          className="glas-input"
+                          placeholder="Recipient address (optional)"
+                          value={recipientAddress}
+                          onChange={(e) => setRecipientAddress(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "10px",
+                            fontSize: "14px",
+                            borderRadius: "8px",
+                            border: "1px solid var(--glass-border)",
+                            background: "rgba(255, 255, 255, 0.05)",
+                            color: "var(--text-primary)",
+                          }}
+                        />
+                        <button
+                          className="btn btn-primary"
+                          onClick={handleRegister}
+                          disabled={isRegistering}
+                          style={{ width: "100%" }}
+                        >
+                          {isRegistering ? (
+                            <Loader2 size={18} className="animate-spin" />
+                          ) : (
+                            recipientAddress ? "Register for Address" : "Register Now"
+                          )}
+                        </button>
+                      </div>
                     ) : (
                       <button
                         className="btn btn-primary"

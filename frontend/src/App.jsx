@@ -147,7 +147,14 @@ function App() {
           </div>
         )}
       </main>
-      <footer style={{ textAlign: "center", padding: "2rem", marginTop: "2rem", color: "var(--text-secondary)" }}>
+      <footer
+        style={{
+          textAlign: "center",
+          padding: "2rem",
+          marginTop: "2rem",
+          color: "var(--text-secondary)",
+        }}
+      >
         <p>&copy; copyright 2026, made with love, by Philip</p>
       </footer>
       <ToastContainer toasts={toasts} removeToast={removeToast} />
