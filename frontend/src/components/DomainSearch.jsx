@@ -114,12 +114,11 @@ export default function DomainSearch({
           setIsRegistering(false);
           return;
         }
+        // Since registerDomainFor does not have the 'payable' modifier in the contract,
+        // DO NOT send value in the transaction object.
         tx = await contract.registerDomainFor(
           searchResult.domain,
           recipientAddress,
-          {
-            value: feeWei,
-          },
         );
       } else {
         tx = await contract.registerDomain(searchResult.domain, {
