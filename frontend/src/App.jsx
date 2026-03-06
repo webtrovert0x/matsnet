@@ -121,6 +121,8 @@ function App() {
         connectWallet={connectWallet}
         disconnectWallet={disconnectWallet}
         isConnecting={isConnecting}
+        provider={provider}
+        contractAddress={CONTRACT_ADDRESS}
       />
       <main className="container">
         <Hero />

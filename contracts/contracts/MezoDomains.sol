@@ -12,11 +12,15 @@ contract MezoDomains is ERC721, Ownable {
     // Mapping from token ID to domain name
     mapping(uint256 => string) public tokenIdToDomain;
     
+    // Reverse Resolution: Mapping from user address to their primary domain name
+    mapping(address => string) public primaryDomain;
+
     // Registration cost is 0.0001 native token (e.g. BTC on Matsnet) by default
     uint256 public registrationFee = 0.0001 ether; 
 
     // Events
     event DomainRegistered(string indexed domainName, address indexed owner, uint256 indexed tokenId);
+    event PrimaryDomainSet(address indexed owner, string domainName);
     
     constructor() ERC721("Mezo Domains", "MZD") {
         _transferOwnership(msg.sender);
@@ -36,8 +40,36 @@ contract MezoDomains is ERC721, Ownable {
         tokenIdToDomain[currentTokenId] = _domainName;
         
         _safeMint(_to, currentTokenId);
+
+        // Auto-set as primary domain if they don't have one yet
+        if (bytes(primaryDomain[_to]).length == 0) {
+            primaryDomain[_to] = _domainName;
+            emit PrimaryDomainSet(_to, _domainName);
+        }
         
         emit DomainRegistered(_domainName, _to, currentTokenId);
+    }
+
+    /**
+     * @dev Set the primary domain for an address. Must own the domain.
+     * @param _domainName The domain name to set as primary
+     */
+    function setPrimaryDomain(string memory _domainName) public {
+        uint256 tokenId = domainToTokenId[_domainName];
+        require(tokenId != 0, "Domain not registered");
+        require(ownerOf(tokenId) == msg.sender, "You do not own this domain");
+        
+        primaryDomain[msg.sender] = _domainName;
+        emit PrimaryDomainSet(msg.sender, _domainName);
+    }
+
+    /**
+     * @dev Get the primary domain for a specific address
+     * @param _owner The address to check
+     * @return The primary domain name string
+     */
+    function getPrimaryDomain(address _owner) public view returns (string memory) {
+        return primaryDomain[_owner];
     }
 
     /**

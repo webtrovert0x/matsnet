@@ -12,10 +12,11 @@ export default function Dashboard({
 }) {
   const [domains, setDomains] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [primaryDomain, setPrimaryDomain] = useState(null);
+  const [isSettingPrimary, setIsSettingPrimary] = useState(false);
 
   const fetchUserDomains = useCallback(async () => {
     if (!provider || !account) return;
-    // Guard against zero/missing contract address
     if (
       !contractAddress ||
       contractAddress === "0x0000000000000000000000000000000000000000"
@@ -32,8 +33,11 @@ export default function Dashboard({
         provider,
       );
 
-      // Read total minted token count directly from the contract — much more reliable
-      // than querying Transfer events which can fail on testnet RPCs.
+      // Read current primary domain
+      const pDomain = await contract.getPrimaryDomain(account);
+      setPrimaryDomain(pDomain && pDomain !== "" ? pDomain : null);
+
+      // Read total minted token count directly from the contract
       const nextId = await contract.nextTokenId();
       const totalMinted = Number(nextId);
 
@@ -64,6 +68,35 @@ export default function Dashboard({
   useEffect(() => {
     fetchUserDomains();
   }, [fetchUserDomains]);
+
+  const handleSetPrimary = async (domainName) => {
+    try {
+      setIsSettingPrimary(true);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        contractAddress,
+        MezoDomainsABI.abi,
+        signer,
+      );
+
+      const tx = await contract.setPrimaryDomain(domainName);
+      if (showToast) showToast("Transaction submitted...", "success");
+
+      await tx.wait();
+
+      setPrimaryDomain(domainName);
+      if (showToast)
+        showToast(`${domainName} is now your primary name!`, "success");
+
+      // Optionally trigger global refresh
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (error) {
+      console.error("Failed to set primary domain", error);
+      if (showToast) showToast("Failed to set primary domain.", "error");
+    } finally {
+      setIsSettingPrimary(false);
+    }
+  };
 
   return (
     <div
@@ -131,10 +164,46 @@ export default function Dashboard({
                   fontSize: "20px",
                   color: "var(--accent-color)",
                   marginBottom: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
               >
                 {domain.name}
               </h3>
+
+              <div style={{ marginBottom: "16px" }}>
+                {primaryDomain === domain.name ? (
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      background: "rgba(16, 185, 129, 0.2)",
+                      color: "#10b981",
+                      padding: "4px 8px",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    Primary Name
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => handleSetPrimary(domain.name)}
+                    disabled={isSettingPrimary}
+                    style={{
+                      fontSize: "12px",
+                      background: "rgba(255,255,255,0.1)",
+                      border: "none",
+                      color: "white",
+                      padding: "4px 10px",
+                      borderRadius: "12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Set as Primary
+                  </button>
+                )}
+              </div>
+
               <a
                 href={`https://explorer.test.mezo.org/address/${contractAddress}?tab=tokens`}
                 target="_blank"

@@ -1,15 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Wallet, LogOut, ChevronDown } from "lucide-react";
+import { ethers } from "ethers";
+import MezoDomainsABI from "../contracts/MezoDomains.json";
 
 export default function Header({
   account,
   connectWallet,
   disconnectWallet,
   isConnecting,
+  provider,
+  contractAddress,
 }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [primaryName, setPrimaryName] = useState(null);
+
+  useEffect(() => {
+    const fetchPrimaryName = async () => {
+      if (account && provider && contractAddress) {
+        try {
+          const contract = new ethers.Contract(
+            contractAddress,
+            MezoDomainsABI.abi,
+            provider,
+          );
+          const name = await contract.getPrimaryDomain(account);
+          if (name && name !== "") {
+            setPrimaryName(name);
+          } else {
+            setPrimaryName(null);
+          }
+        } catch (e) {
+          console.error("Failed to fetch primary name", e);
+        }
+      }
+    };
+    fetchPrimaryName();
+  }, [account, provider, contractAddress]);
 
   const formatAddress = (address) => {
+    if (primaryName) return primaryName;
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
