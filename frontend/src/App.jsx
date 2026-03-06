@@ -149,13 +149,99 @@ function App() {
       </main>
       <footer
         style={{
-          textAlign: "center",
-          padding: "2rem",
-          marginTop: "2rem",
-          color: "var(--text-secondary)",
+          borderTop: "1px solid var(--glass-border)",
+          background: "rgba(0,0,0,0.2)",
+          padding: "3rem 1rem",
+          marginTop: "4rem",
         }}
       >
-        <p>&copy; copyright 2026, made with love, by Philip</p>
+        <div
+          className="container"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "1.5rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <img
+              src="/IMG_3980.jpeg"
+              alt="Mezo Logo"
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
+            <span style={{ fontSize: "1.2rem", fontWeight: "700" }}>
+              Mezo<span className="gradient-text">Domains</span>
+            </span>
+          </div>
+
+          <div style={{ display: "flex", gap: "24px", fontSize: "0.95rem" }}>
+            <a
+              href="https://twitter.com/MezoNetwork"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                color: "var(--text-secondary)",
+                textDecoration: "none",
+                transition: "color 0.2s",
+              }}
+            >
+              Twitter
+            </a>
+            <a
+              href="https://discord.gg/mezo"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                color: "var(--text-secondary)",
+                textDecoration: "none",
+                transition: "color 0.2s",
+              }}
+            >
+              Discord
+            </a>
+            <a
+              href="https://mezo.org"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                color: "var(--text-secondary)",
+                textDecoration: "none",
+                transition: "color 0.2s",
+              }}
+            >
+              Website
+            </a>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              height: "1px",
+              background: "var(--glass-border)",
+              margin: "0.5rem 0",
+            }}
+          ></div>
+
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "0.9rem",
+              margin: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            &copy; 2026 MezoDomains. Made with{" "}
+            <span style={{ color: "#ef4444" }}>❤️</span> by Philip.
+          </p>
+        </div>
       </footer>
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>

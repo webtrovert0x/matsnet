@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { Search, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import MezoDomainsABI from "../contracts/MezoDomains.json";
@@ -18,6 +18,26 @@ export default function DomainSearch({
   const [isRegistering, setIsRegistering] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState("");
   const [txHash, setTxHash] = useState("");
+  const [contractOwner, setContractOwner] = useState("");
+
+  useEffect(() => {
+    const fetchOwner = async () => {
+      if (provider) {
+        try {
+          const contract = new ethers.Contract(
+            contractAddress,
+            MezoDomainsABI.abi,
+            provider,
+          );
+          const owner = await contract.owner();
+          setContractOwner(owner.toLowerCase());
+        } catch (err) {
+          console.error("Failed to fetch contract owner", err);
+        }
+      }
+    };
+    fetchOwner();
+  }, [provider, contractAddress]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -94,9 +114,13 @@ export default function DomainSearch({
           setIsRegistering(false);
           return;
         }
-        tx = await contract.registerDomainFor(searchResult.domain, recipientAddress, {
-          value: feeWei,
-        });
+        tx = await contract.registerDomainFor(
+          searchResult.domain,
+          recipientAddress,
+          {
+            value: feeWei,
+          },
+        );
       } else {
         tx = await contract.registerDomain(searchResult.domain, {
           value: feeWei,
@@ -107,7 +131,10 @@ export default function DomainSearch({
 
       await tx.wait();
 
-      const newOwner = (recipientAddress && ethers.isAddress(recipientAddress)) ? recipientAddress : account;
+      const newOwner =
+        recipientAddress && ethers.isAddress(recipientAddress)
+          ? recipientAddress
+          : account;
 
       // Update UI to show it's now owned by the new owner
       setSearchResult({ available: false, owner: newOwner });
@@ -247,23 +274,34 @@ export default function DomainSearch({
                       {searchResult.price} BTC
                     </div>
                     {account ? (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        <input
-                          type="text"
-                          className="glas-input"
-                          placeholder="Recipient address (optional)"
-                          value={recipientAddress}
-                          onChange={(e) => setRecipientAddress(e.target.value)}
-                          style={{
-                            width: "100%",
-                            padding: "10px",
-                            fontSize: "14px",
-                            borderRadius: "8px",
-                            border: "1px solid var(--glass-border)",
-                            background: "rgba(255, 255, 255, 0.05)",
-                            color: "var(--text-primary)",
-                          }}
-                        />
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        {contractOwner &&
+                          account.toLowerCase() === contractOwner && (
+                            <input
+                              type="text"
+                              className="glas-input"
+                              placeholder="Recipient address (optional)"
+                              value={recipientAddress}
+                              onChange={(e) =>
+                                setRecipientAddress(e.target.value)
+                              }
+                              style={{
+                                width: "100%",
+                                padding: "10px",
+                                fontSize: "14px",
+                                borderRadius: "8px",
+                                border: "1px solid var(--glass-border)",
+                                background: "rgba(255, 255, 255, 0.05)",
+                                color: "var(--text-primary)",
+                              }}
+                            />
+                          )}
                         <button
                           className="btn btn-primary"
                           onClick={handleRegister}
@@ -272,8 +310,10 @@ export default function DomainSearch({
                         >
                           {isRegistering ? (
                             <Loader2 size={18} className="animate-spin" />
+                          ) : recipientAddress ? (
+                            "Register for Address"
                           ) : (
-                            recipientAddress ? "Register for Address" : "Register Now"
+                            "Register Now"
                           )}
                         </button>
                       </div>

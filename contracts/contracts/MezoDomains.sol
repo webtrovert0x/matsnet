@@ -23,15 +23,12 @@ contract MezoDomains is ERC721, Ownable {
     }
     
     /**
-     * @dev Register a new domain name for a specific address
-     * @param _domainName The string domain name to register (e.g. "alice.poor")
-     * @param _to The address that will own the domain
+     * @dev Internal function to handle the actual registration and minting
      */
-    function registerDomainFor(string memory _domainName, address _to) public payable {
+    function _register(string memory _domainName, address _to) internal {
         require(bytes(_domainName).length > 0, "Domain name cannot be empty");
         require(domainToTokenId[_domainName] == 0, "Domain already registered");
         require(_to != address(0), "Cannot register to zero address");
-        require(msg.value >= registrationFee, "Insufficient fee provided");
         
         uint256 currentTokenId = ++nextTokenId;
         
@@ -42,13 +39,23 @@ contract MezoDomains is ERC721, Ownable {
         
         emit DomainRegistered(_domainName, _to, currentTokenId);
     }
+
+    /**
+     * @dev Register a new domain name for a specific address (Only Owner)
+     * @param _domainName The string domain name to register (e.g. "alice.poor")
+     * @param _to The address that will own the domain
+     */
+    function registerDomainFor(string memory _domainName, address _to) public onlyOwner {
+        _register(_domainName, _to);
+    }
     
     /**
      * @dev Register a new domain name
      * @param _domainName The string domain name to register (e.g. "alice.poor")
      */
     function registerDomain(string memory _domainName) public payable {
-        registerDomainFor(_domainName, msg.sender);
+        require(msg.value >= registrationFee, "Insufficient fee provided");
+        _register(_domainName, msg.sender);
     }
     
     /**
