@@ -1,4 +1,4 @@
-# MezoDomains — .poor Domain Name Service on Mezo Matsnet
+# MezoDomains .poor Domain Name Service on Mezo Matsnet
 
 Register custom `.poor` domain names on [Mezo](https://mezo.org), the Bitcoin-first Layer 2. Built like ENS but for Matsnet's testnet.
 
